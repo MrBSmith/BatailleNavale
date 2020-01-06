@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1578335461 source:d:\projets programmation\bataillenavale\bataillenavale\main.c
+	<stdio.h>
+	<stdlib.h>
+	<time.h>
+	<windows.h>
+	<conio.h>
+
