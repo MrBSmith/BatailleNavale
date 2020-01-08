@@ -1,8 +1,19 @@
 # depslib dependency file v1.0
-1578386599 source:d:\projets programmation\bataillenavale\bataillenavale\main.c
+1578492952 source:d:\projets programmation\bataillenavale\bataillenavale\main.c
 	<stdio.h>
 	<stdlib.h>
 	<time.h>
 	<windows.h>
 	<conio.h>
+	"prototype.h"
+	"functions.h"
+
+1578473612 d:\projets programmation\bataillenavale\bataillenavale\prototype.h
+	"types.h"
+
+1578475341 d:\projets programmation\bataillenavale\bataillenavale\types.h
+
+1578492985 d:\projets programmation\bataillenavale\bataillenavale\functions.h
+	"types.h"
+	"prototype.h"
 
