@@ -4,6 +4,35 @@
 #include "types.h"
 #include "prototype.h"
 
+void display_player_board_state(vector2 self_board[ARRAY_SIZE][ARRAY_SIZE], char enemy_board[ARRAY_SIZE][ARRAY_SIZE]){
+    for(int i = 0; i < ARRAY_SIZE; i++){
+        for(int j = 0; j < ARRAY_SIZE; j++){
+            init_color(self_board[i][j].x, self_board[i][j].y);
+            printf("%d ", enemy_board[i][j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+// Return the current player's opponent
+player* get_opponent(player* player_pointer_array[], player *p_current_player){
+    player* p_opponent;
+    if(p_current_player == player_pointer_array[0]){
+        p_opponent = player_pointer_array[1];
+    } else{
+        p_opponent = player_pointer_array[0];
+    }
+    return p_opponent;
+}
+
+// Display the current player's boat placement
+void display_boat_placement(vector2 g_array[ARRAY_SIZE][ARRAY_SIZE], vector2 cursor_pos, boat current_boat, int direction, player* p_current_player){
+    system("cls");
+    printf("Au tour de %s de placer ses bateaux.\n", (*p_current_player).name);
+    print_array_placement((*p_current_player).self_board, cursor_pos, current_boat, direction);
+}
+
 // Place the given boat at the given position, with the given direction in the given array
 void place_boat(vector2 board[ARRAY_SIZE][ARRAY_SIZE], boat current_boat, vector2 cursor_pos, int direction){
     int h = 0, v = 0, i = 0, j = 0;
@@ -19,7 +48,7 @@ void place_boat(vector2 board[ARRAY_SIZE][ARRAY_SIZE], boat current_boat, vector
         }
 
         board[h][v].x = WHITE;
-        board[h][v].y = BLUE;
+        board[h][v].y = GREEN;
     }
 }
 
@@ -117,17 +146,6 @@ void copy_board(vector2 board_to_copy[ARRAY_SIZE][ARRAY_SIZE], vector2 destinati
             destination_board[i][j] = board_to_copy[i][j];
         }
     }
-}
-
-// Print every cells of the given array
-void print_array_test(vector2 g_array[ARRAY_SIZE][ARRAY_SIZE], vector2 cursor_pos, boat curent_boat, int direction){
-    for(int i = 0; i<ARRAY_SIZE; i++){
-        for(int j = 0; j<ARRAY_SIZE; j++){
-            printf("%d ", g_array[i][j].x);
-        }
-        printf("\n");
-    }
-    printf("\n");
 }
 
 // Print every cells of the given array

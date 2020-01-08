@@ -12,6 +12,7 @@ typedef enum BOULEIN{
 }BOULEIN;
 
 typedef enum COLOR{
+    GREEN = 2,
     RED = 12,
     BLACK = 0,
     BLUE = 9,
