@@ -8,8 +8,18 @@
 #include "functions.h"
 
 // Main procedure
-int main()
+int main(){
+    // menu();  (Yet to be added)
+    // display_score (Yet to be added)
+    gameplay();
+    return 0;
+}
+
+
+// Procedure of a game
+void gameplay()
 {
+    // Players definition
     player player1;
     player player2;
 
@@ -22,7 +32,7 @@ int main()
     // Get the players to enter their names
     for(int p = 0; p < player_nb; p++){
         printf("Entrez le nom du %de joueur\n", p + 1);
-        gets((*player_pointer_list[p]).name);
+        gets(player_pointer_list[p] -> name);
     }
 
     // Initialize arrays
@@ -35,7 +45,7 @@ int main()
 
     init_color_array(preview_array);
 
-
+    // Cursor declaration
     vector2 cursor_position = {0, 0};
     vector2* p_cursor_pos = &cursor_position;
 
@@ -52,6 +62,7 @@ int main()
     boat current_boat;
 
     int boat_type_nb = sizeof(boat_list) / sizeof(boat_list[0]);
+
     int input, nb_ex_left;
 
     // Boat placement loop
@@ -68,7 +79,7 @@ int main()
             current_boat = boat_list[i];
             nb_ex_left = current_boat.initial_nb;
             if (i == 0){
-                display_boat_placement((*p_current_player).self_board, cursor_position, current_boat, direction, p_current_player);
+                display_boat_placement(p_current_player -> self_board, cursor_position, current_boat, direction, p_current_player);
             }
             input = -1;
 
@@ -88,47 +99,79 @@ int main()
 
                 // Else if the player's input is enter, place the current boat in the cursor position
                 }else if(input == ENTER){
-                    place_boat((*p_current_player).self_board, current_boat, cursor_position, direction);
+                    place_boat(p_current_player -> self_board, current_boat, cursor_position, direction);
                     nb_ex_left--;
                 }
 
                 // Display
-                copy_board((*p_current_player).self_board, preview_array);
-                display_boat_placement((*p_current_player).self_board, cursor_position, current_boat, direction, p_current_player);
+                copy_board(p_current_player -> self_board, preview_array);
+                display_boat_placement(p_current_player -> self_board, cursor_position, current_boat, direction, p_current_player);
             }
         }
     }
 
+    // Reset the cursor position
     cursor_position.x = 0;
     cursor_position.y = 0;
 
     // Gameplay Procedure
+
+    // Change player each turn
     for(int p = 0; p < player_nb; p++){
 
         p_current_player = player_pointer_list[p];
         p_opponent_player = get_opponent(player_pointer_list, p_current_player);
 
-        // Display self board
-        display_player_board_state(p_current_player -> self_board, p_opponent_player -> enemy_board);
+        // Refresh the display at every input
+        while(2 + 2 != 5){
 
-        input = ask_for_input();
-        respond_to_input(input, p_cursor_pos, p_direction);
+            system("cls");
 
-        // If the player's input is a direction, ceil the position of the cursor
-        if(input != ENTER && input != ERR){
-            ceil_position(p_cursor_pos, 0, ARRAY_SIZE - 1, 0, ARRAY_SIZE - 1);
+            // Print witch player's turn it is
+            printf("C'est le tour de %s: \n", p_current_player -> name);
 
-        // Else if the player's input is enter, place the current boat in the cursor position
-        }else if(input == ENTER){
-            // Shoot procedure (yet to be added)
+            // Print the current_player self board
+            printf("Voici l'etat de votre grille:\n");
+            print_board_state(p_current_player -> self_board, p_opponent_player -> enemy_board, cursor_position, FAUX);
+
+
+            // Print what the current player knows about the opponent board
+            printf("Voici l'etat de la grille de votre adversaire:\n");
+            print_board_state(p_opponent_player -> self_board, p_current_player -> enemy_board, cursor_position, VRAI);
+
+            input = ask_for_input();
+            respond_to_input(input, p_cursor_pos, p_direction);
+
+            // If the player's input is a direction, ceil the position of the cursor
+            if(input != ENTER && input != ERR){
+                ceil_position(p_cursor_pos, 0, ARRAY_SIZE - 1, 0, ARRAY_SIZE - 1);
+
+            // Else if the player's input is ENTER, try to fire in the current cursor's position
+            } else if(input == ENTER){
+
+                // Check if the current position has already been fired of not
+                if(p_current_player -> enemy_board[cursor_position.y][cursor_position.x] != 'X'){
+                    p_current_player -> enemy_board[cursor_position.y][cursor_position.x] = 'X';
+
+                    // Damage the boat if there is one in the current position
+                    if(p_opponent_player -> self_board[cursor_position.y][cursor_position.x].y == UNDAMAGED_BOAT_CELL.y){
+                        p_opponent_player -> self_board[cursor_position.y][cursor_position.x] = DAMAGED_BOAT_CELL;
+                    }
+                }
+            }
+
+            // Check for current player's victory
+            if(is_winning(p_opponent_player, boat_list, boat_type_nb) == VRAI){
+                printf("%s a gagne la partie!", p_current_player -> name);
+                input = ask_for_input();
+                return;
+
+            }
+
         }
-
-        // Display opponent's board state (Yet to be added)
 
         if(p == player_nb - 1){
             p = 0;
         }
     }
-
-    return 0;
 }

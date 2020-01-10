@@ -9,16 +9,19 @@
 typedef enum BOULEIN{
     VRAI = 0,
     FAUX = 1
-}BOULEIN;
+} BOULEIN;
 
+// Color list definition
 typedef enum COLOR{
     GREEN = 2,
     RED = 12,
     BLACK = 0,
     BLUE = 9,
     WHITE = 15
-}COLOR;
+} COLOR;
 
+
+// Input list definition
 typedef enum INPUTS{
     UP,
     DOWN,
@@ -27,25 +30,38 @@ typedef enum INPUTS{
     ENTER,
     SPACE,
     ERR
-}INPUTS;
+} INPUTS;
 
+
+// Vector2 definition
 typedef struct vector2{
     int x;
     int y;
-}vector2;
+} vector2;
 
+
+// Boat type definition
 typedef struct boat{
     char name[12];
     vector2 position;
     int lenght;
     int initial_nb;
-}boat;
+} boat;
 
+
+// Player type definition
 typedef struct player{
     char name[10];
     vector2 self_board[ARRAY_SIZE][ARRAY_SIZE];
     char enemy_board[ARRAY_SIZE][ARRAY_SIZE];
-}player;
+} player;
 
+
+// Cells color definition
+vector2 EMPTY_CELL = {WHITE, BLACK};
+vector2 CURSOR_CELL = {BLACK, WHITE};
+vector2 WATER_CELL = {WHITE, BLUE};
+vector2 DAMAGED_BOAT_CELL = {WHITE, RED};
+vector2 UNDAMAGED_BOAT_CELL = {WHITE, GREEN};
 
 #endif // TYPES_H_INCLUDED
