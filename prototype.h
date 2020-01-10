@@ -7,6 +7,9 @@
 // Main procedures of the program
 void gameplay();
 
+// Navigate through a menu
+int navigate_menu(int index, int menu_size, INPUTS input);
+
 // Inputs management
 INPUTS ask_for_input();
 void respond_to_input(INPUTS input, vector2 *position, int *p_direction);
@@ -23,7 +26,11 @@ void print_self_board(vector2 array[ARRAY_SIZE][ARRAY_SIZE], vector2 cursor_pos,
 void print_array_placement(vector2 array[ARRAY_SIZE][ARRAY_SIZE], vector2 cursor_pos, boat curent_boat, int direction);
 void print_board_state(vector2 self_board[][ARRAY_SIZE], char enemy_board[][ARRAY_SIZE], vector2 cursor_pos, BOULEIN shooting);
 
+void print_menu(char* menu_option_list[3], int menu_option_list_size, int cursor);
+
+// Display procedures
 void display_boat_placement(vector2 g_array[ARRAY_SIZE][ARRAY_SIZE], vector2 cursor_pos, boat curent_boat, int direction, player* p_current_player);
+void display_gameplay(player* p_current_player, player* p_opponent_player, vector2 cursor_position);
 
 // Toggle values
 void toggle_bool(BOULEIN boolean);
@@ -38,6 +45,9 @@ void ceil_position(vector2 *position, int x_min, int x_max, int y_min, int y_max
 // Copy a board in another board
 void copy_board(vector2 board_to_copy[ARRAY_SIZE][ARRAY_SIZE], vector2 destination_board[ARRAY_SIZE][ARRAY_SIZE]);
 BOULEIN is_cell_inside_boat(int direction, vector2 cursor_pos, int boat_len, int i, int j);
+
+// Return VRAI is the boat location is valid, FAUX if not
+BOULEIN is_boat_location_valid(player* p_current_player, vector2 cursor_pos, boat current_boat, int direction);
 
 // Player turn management
 player* get_opponent(player* player_pointer_array[], player *p_current_player);

@@ -4,6 +4,101 @@
 #include "types.h"
 #include "prototype.h"
 
+// Menu navigation
+int navigate_menu(int index, int menu_size, INPUTS input){
+    if(input == UP){
+        index--;
+        if(index < 0){
+            index = menu_size - 1;
+        }
+    } else if(input == DOWN){
+        index++;
+        if(index > menu_size - 1){
+            index = 0;
+        }
+    }
+    return index;
+}
+
+// Toggle player index
+int toggle_player_index(int p){
+    if(p == 0){
+        p = 1;
+    } else {
+        p = 0;
+    }
+    return p;
+}
+
+// Write into the file
+void write_score(player* p_player, int score){
+    FILE* p_score_file = fopen("score.bin", "w");
+
+    if(p_score_file == NULL){
+        printf("L'ouverture du fichier n'a pas fonctionnee\n");
+    } else {
+        printf("L'ouverture du fichier a bien fonctionnee\n");
+    }
+}
+
+// Return VRAI is the boat location is valid, FAUX if not
+BOULEIN is_boat_location_valid(player* p_current_player, vector2 cursor_pos, boat current_boat, int direction){
+    for(int i = 0; i < current_boat.lenght; i++){
+        if(direction == HORIZONTAL){
+            if(p_current_player -> self_board[cursor_pos.y][cursor_pos.x + i].y == UNDAMAGED_BOAT_CELL.y){
+                return FAUX;
+            }
+        } else {
+            if(p_current_player -> self_board[cursor_pos.y + i][cursor_pos.x].y == UNDAMAGED_BOAT_CELL.y){
+                return FAUX;
+            }
+        }
+    }
+    return VRAI;
+}
+
+// Print the menu
+void print_menu(char* menu_option_list[3], int menu_option_list_size, int cursor){
+
+    system("cls");
+
+    vector2 RED_TEXT = {RED, BLACK};
+    vector2 NORMAL_TEXT = {WHITE, BLACK};
+    char str[20];
+
+    for(int i = 0; i < menu_option_list_size; i++){
+
+        // Turn the text red, if it is the currently selected text
+        if(i == cursor){
+            change_text_color_vector2(RED_TEXT);
+        } else {
+            change_text_color_vector2(NORMAL_TEXT);
+        }
+
+        strcpy(str, menu_option_list[i]);
+        printf("%s", str);
+
+        change_text_color_vector2(NORMAL_TEXT);
+        printf("\n");
+    }
+}
+
+// Display gameplay procedure
+void display_gameplay(player* p_current_player, player* p_opponent_player, vector2 cursor_position){
+    system("cls");
+
+    // Print witch player's turn it is
+    printf("C'est le tour de %s: \n", p_current_player -> name);
+
+    // Print the current_player self board
+    printf("Voici l'etat de votre grille:\n");
+    print_board_state(p_current_player -> self_board, p_opponent_player -> enemy_board, cursor_position, FAUX);
+
+   // Print what the current player knows about the opponent board
+    printf("Voici l'etat de la grille de votre adversaire:\n");
+    print_board_state(p_opponent_player -> self_board, p_current_player -> enemy_board, cursor_position, VRAI);
+}
+
 // Victory condition: return VRAI if the current player wins, FAUX if not
 BOULEIN is_winning(player *p_opponent, boat boat_list[], int boat_list_lenght){
     int cells_to_hit = 0;
@@ -130,6 +225,7 @@ void respond_to_input(INPUTS input, vector2 *position, int *p_direction){
         case SPACE: toggle_direction(p_direction); break;
         case ENTER: break;
         case ERR: printf("Erreur\n"); break;
+        default: break;
     }
 }
 

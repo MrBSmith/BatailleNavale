@@ -5,11 +5,14 @@
 #define VERTICAL 1
 #define ARRAY_SIZE 10
 
-// Custom types
+////     CUSTOM TYPES    ////
+
+// Booleen
 typedef enum BOULEIN{
     VRAI = 0,
     FAUX = 1
 } BOULEIN;
+
 
 // Color list definition
 typedef enum COLOR{
@@ -23,6 +26,7 @@ typedef enum COLOR{
 
 // Input list definition
 typedef enum INPUTS{
+    EMPTY_INPUT,
     UP,
     DOWN,
     LEFT,
@@ -63,5 +67,6 @@ vector2 CURSOR_CELL = {BLACK, WHITE};
 vector2 WATER_CELL = {WHITE, BLUE};
 vector2 DAMAGED_BOAT_CELL = {WHITE, RED};
 vector2 UNDAMAGED_BOAT_CELL = {WHITE, GREEN};
+
 
 #endif // TYPES_H_INCLUDED
