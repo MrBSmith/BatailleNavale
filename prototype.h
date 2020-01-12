@@ -2,10 +2,18 @@
 #define PROTOTYPE_H_INCLUDED
 #include "types.h"
 
-// PROTOTYPES
+////   PROTOTYPES   ////
+
+// Score file
+void init_score_file();
+void write_score(char name[20], int score);
 
 // Main procedures of the program
 void gameplay();
+void score();
+
+// Procedure of the menu, returns the selected menu option index
+int menu();
 
 // Navigate through a menu
 int navigate_menu(int index, int menu_size, INPUTS input);

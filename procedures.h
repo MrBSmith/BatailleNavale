@@ -8,6 +8,7 @@
 // Menu procedure
 int menu(){
 
+    // Define the needed variables
     char option1[20] = "Nouvelle partie";
     char option2[20] = "Score";
     char option3[20] = "Quitter";
@@ -19,6 +20,7 @@ int menu(){
 
     int i = 0;
 
+    // Display and option choice procedures
     while(input != ENTER){
         // Print the menu
         print_menu(menu_option_list, menu_option_list_size, i);
@@ -30,6 +32,39 @@ int menu(){
         i = navigate_menu(i, menu_option_list_size, input);
     }
     return i;
+}
+
+
+// Display the score of previous games
+void score(){
+    system("cls");
+
+    // Check if the file exists
+    if(access("score.bin", F_OK ) != -1){
+        FILE* p_score_file = fopen("score.bin", "rb");
+        int score_int;
+        char name[20];
+        int str_size_oct = sizeof(char) * 20;
+
+        if(p_score_file != NULL){
+            while(2){
+                size_t n_name = fread(name, str_size_oct, 1, p_score_file);
+                size_t n_score = fread(&score_int, 4, 1, p_score_file);
+                if (n_name < 1 || n_score < 1) { break; }
+                printf("Joueur: %s | Score: %d\n", name, score_int);
+            }
+        } else {
+            printf("Erreur lors de la lecture du fichier de score.\n");
+        }
+    } else {
+        printf("Aucun score a afficher. Personne n'a encore joue au jeu sur cette machine\n");
+    }
+
+    printf("Appuyez sur une touche pour revenir au menu.\n");
+
+    ask_for_input();
+
+    return;
 }
 
 
@@ -47,10 +82,11 @@ void gameplay()
 
     int player_nb = sizeof(player_pointer_list) / sizeof(player_pointer_list[0]);
 
-    // Get the players to enter their names
+    // Get the players to enter their names and initialize their scores
     for(int p = 0; p < player_nb; p++){
         printf("Entrez le nom du %de joueur\n", p + 1);
         gets(player_pointer_list[p] -> name);
+        player_pointer_list[p] -> score = 100;
     }
 
     // Initialize arrays
@@ -83,8 +119,7 @@ void gameplay()
     // Loop through every players
     for(int p = 0; p < player_nb; p++){
 
-        cursor_position.x = 0;
-        cursor_position.y = 0;
+        // Change current player
         p_current_player = player_pointer_list[p];
 
         // Loop through the list of boat types
@@ -106,7 +141,7 @@ void gameplay()
                 respond_to_input(input, p_cursor_pos, p_direction);
 
                 // If the player's input is a direction, ceil the position of the cursor
-                if(input != ENTER && input != ERR){
+                if(input == UP || input == DOWN || input == LEFT || input == RIGHT || input == SPACE){
                     if(direction == HORIZONTAL){
                         ceil_position(p_cursor_pos, 0, ARRAY_SIZE - current_boat.lenght, 0, ARRAY_SIZE - 1);
                     } else {
@@ -119,7 +154,7 @@ void gameplay()
                 // Else if the player's input is enter, place the current boat in the cursor position
                 } else if(input == ENTER) {
 
-                    write_score(p_current_player, 10);
+                    // write_score(p_current_player, 10);
 
                     if(is_boat_location_valid(p_current_player, cursor_position, current_boat, direction) == VRAI){
                         // Place the boat
@@ -134,14 +169,12 @@ void gameplay()
                 }
             }
         }
+
+        // Reset the cursor position
+        reset_cursor_pos(&cursor_position);
     }
 
-    // Reset the cursor position
-    cursor_position.x = 0;
-    cursor_position.y = 0;
-
     // Reset the input
-
     input = EMPTY_INPUT;
     INPUTS next_phase;
 
@@ -179,6 +212,11 @@ void gameplay()
 
                 // Check if the current position has already been fired of not
                 if(p_current_player -> enemy_board[cursor_position.y][cursor_position.x] != 'X'){
+
+                    // Decrement the score of the current player
+                    p_current_player -> score--;
+
+                    //
                     p_current_player -> enemy_board[cursor_position.y][cursor_position.x] = 'X';
                     fire = VRAI;
 
@@ -208,7 +246,9 @@ void gameplay()
             if(is_winning(p_opponent_player, boat_list, boat_type_nb) == VRAI){
                 printf("%s a gagne la partie!\n", p_current_player -> name);
                 somebody_win = VRAI;
-                write_score(p_current_player, 10);
+
+                // Write the score of the winning player in the binary file
+                write_score(p_current_player -> name, p_current_player -> score);
             }
         }
 

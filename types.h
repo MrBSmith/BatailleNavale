@@ -5,7 +5,7 @@
 #define VERTICAL 1
 #define ARRAY_SIZE 10
 
-////     CUSTOM TYPES    ////
+////    CUSTOM TYPES    ////
 
 // Booleen
 typedef enum BOULEIN{
@@ -58,6 +58,7 @@ typedef struct player{
     char name[10];
     vector2 self_board[ARRAY_SIZE][ARRAY_SIZE];
     char enemy_board[ARRAY_SIZE][ARRAY_SIZE];
+    int score;
 } player;
 
 
@@ -67,6 +68,5 @@ vector2 CURSOR_CELL = {BLACK, WHITE};
 vector2 WATER_CELL = {WHITE, BLUE};
 vector2 DAMAGED_BOAT_CELL = {WHITE, RED};
 vector2 UNDAMAGED_BOAT_CELL = {WHITE, GREEN};
-
 
 #endif // TYPES_H_INCLUDED

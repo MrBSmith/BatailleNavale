@@ -4,6 +4,13 @@
 #include "types.h"
 #include "prototype.h"
 
+// Reset cursor position
+void reset_cursor_pos(vector2* p_cursor){
+    p_cursor -> x = 0;
+    p_cursor -> y = 0;
+}
+
+
 // Menu navigation
 int navigate_menu(int index, int menu_size, INPUTS input){
     if(input == UP){
@@ -20,6 +27,7 @@ int navigate_menu(int index, int menu_size, INPUTS input){
     return index;
 }
 
+
 // Toggle player index
 int toggle_player_index(int p){
     if(p == 0){
@@ -30,16 +38,22 @@ int toggle_player_index(int p){
     return p;
 }
 
-// Write into the file
-void write_score(player* p_player, int score){
-    FILE* p_score_file = fopen("score.bin", "w");
+
+// Write the score and the player's name into the file
+void write_score(char name[20], int score){
+
+    FILE* p_score_file = fopen("score.bin", "ab");
+    int str_size_oct = sizeof(name[0]) * 20;
 
     if(p_score_file == NULL){
         printf("L'ouverture du fichier n'a pas fonctionnee\n");
     } else {
-        printf("L'ouverture du fichier a bien fonctionnee\n");
+        fwrite(name, str_size_oct, 1, p_score_file);
+        fwrite(&score, 4, 1, p_score_file);
+        fclose(p_score_file);
     }
 }
+
 
 // Return VRAI is the boat location is valid, FAUX if not
 BOULEIN is_boat_location_valid(player* p_current_player, vector2 cursor_pos, boat current_boat, int direction){
@@ -56,6 +70,7 @@ BOULEIN is_boat_location_valid(player* p_current_player, vector2 cursor_pos, boa
     }
     return VRAI;
 }
+
 
 // Print the menu
 void print_menu(char* menu_option_list[3], int menu_option_list_size, int cursor){
@@ -83,6 +98,7 @@ void print_menu(char* menu_option_list[3], int menu_option_list_size, int cursor
     }
 }
 
+
 // Display gameplay procedure
 void display_gameplay(player* p_current_player, player* p_opponent_player, vector2 cursor_position){
     system("cls");
@@ -98,6 +114,7 @@ void display_gameplay(player* p_current_player, player* p_opponent_player, vecto
     printf("Voici l'etat de la grille de votre adversaire:\n");
     print_board_state(p_opponent_player -> self_board, p_current_player -> enemy_board, cursor_position, VRAI);
 }
+
 
 // Victory condition: return VRAI if the current player wins, FAUX if not
 BOULEIN is_winning(player *p_opponent, boat boat_list[], int boat_list_lenght){
