@@ -16,12 +16,12 @@ int main(){
 
     while(2){
 
-        // Menu procedure
+        // Menu procedure (see the procedures.h)
         menu_index = menu();
 
-        // Redirect to the appropriate procedure
+        // Redirect to the appropriate procedure (see the procedures.h)
         switch(menu_index){
-            case 0 : gameplay(); break;
+            case 0 : game(); break;
             case 1 : score(); break;
             case 2 : exit(0); break;
         }

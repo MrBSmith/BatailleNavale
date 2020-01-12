@@ -5,6 +5,8 @@
 #include "prototype.h"
 #include "functions.h"
 
+//////// MAIN PROCEDURES ////////
+
 // Menu procedure
 int menu(){
 
@@ -46,6 +48,7 @@ void score(){
         char name[20];
         int str_size_oct = sizeof(char) * 20;
 
+        // Read the score file until it reach EOF
         if(p_score_file != NULL){
             while(2){
                 size_t n_name = fread(name, str_size_oct, 1, p_score_file);
@@ -56,12 +59,12 @@ void score(){
         } else {
             printf("Erreur lors de la lecture du fichier de score.\n");
         }
-    } else {
+    } else { // If the file does not exist
         printf("Aucun score a afficher. Personne n'a encore joue au jeu sur cette machine\n");
     }
 
+    // Wait for an input to proceed
     printf("Appuyez sur une touche pour revenir au menu.\n");
-
     ask_for_input();
 
     return;
@@ -69,21 +72,24 @@ void score(){
 
 
 // Procedure of a game
-void gameplay()
+void game()
 {
     system("cls");
 
+    // Declare the types of boats
+    boat carrier = {"Porte-Avions", {0, 0}, 5 , 1};
+    boat battleShip = {"Croiseur", {0, 0}, 4 , 1};
+    boat destroyer = {"Torpilleur", {0, 0}, 3, 2};
+    boat submarine = {"Sous-marin", {0, 0}, 2, 1};
+
+    boat* boat_pointer_list[4] = {&carrier, &battleShip, &destroyer, &submarine};
+
     // Players declaration
     player player1, player2;
-
     player* player_pointer_list[2] = {&player1, &player2};
-    player* p_current_player = player_pointer_list[0];
-    player* p_opponent_player = player_pointer_list[1];
-
-    int player_nb = sizeof(player_pointer_list) / sizeof(player_pointer_list[0]);
 
     // Get the players to enter their names and initialize their scores and their boards
-    for(int p = 0; p < player_nb; p++){
+    for(int p = 0; p < 2; p++){
         printf("Entrez le nom du %de joueur\n", p + 1);
         gets(player_pointer_list[p] -> name);
 
@@ -91,9 +97,29 @@ void gameplay()
         init_board(player_pointer_list[p] -> board);
     }
 
+    // Wait for an input to proceed
     printf("Noms enregistres, appuyez sur une touche pour continuer");
-    INPUTS input = ask_for_input();
+    ask_for_input();
 
+    // Boat placement procedure
+    boat_placement_procedure(player_pointer_list, boat_pointer_list);
+
+    // Gameplay procedure
+    gameplay_procedure(player_pointer_list, boat_pointer_list);
+}
+
+
+//////// SUB PROCEDURES ////////
+
+// Boat placement procedure
+void boat_placement_procedure(player* player_pointer_list[2], boat* boat_pointer_list[]){
+
+    player* p_current_player = player_pointer_list[0];
+
+    int boat_type_nb = 4;
+    boat* p_current_boat;
+
+    int nb_ex_left;
 
     // Cursor declaration
     vector2 cursor_position = {0, 0};
@@ -103,24 +129,11 @@ void gameplay()
     int direction = HORIZONTAL;
     int* p_direction = &direction;
 
-    // Declare the types of boats
-    boat carrier = {"Porte-Avions", {0, 0}, 5 , 1};
-    boat battleShip = {"Croiseur", {0, 0}, 4 , 1};
-    boat destroyer = {"Torpilleur", {0, 0}, 3, 2};
-    boat submarine = {"Sous-marin", {0, 0}, 2, 1};
-
-    boat boat_list[4] = {carrier, battleShip, destroyer, submarine};
-    boat current_boat;
-
-    int boat_type_nb = sizeof(boat_list) / sizeof(boat_list[0]);
-
-    int nb_ex_left;
-
-    input = EMPTY_INPUT;
+    INPUTS input;
 
     // Boat placement loop
     // Loop through every players
-    for(int p = 0; p < player_nb; p++){
+    for(int p = 0; p < 2; p++){
 
         // Change current player
         p_current_player = player_pointer_list[p];
@@ -128,10 +141,10 @@ void gameplay()
         // Loop through the list of boat types
         for(int i = 0; i < boat_type_nb; i++){
 
-            current_boat = boat_list[i];
-            nb_ex_left = current_boat.initial_nb;
+            p_current_boat = boat_pointer_list[i];
+            nb_ex_left = p_current_boat -> initial_nb;
             if (i == 0){
-                display_boat_placement(cursor_position, current_boat, direction, p_current_player);
+                display_boat_placement(cursor_position, p_current_boat, direction, p_current_player);
             }
 
             // Empty the input variable
@@ -146,24 +159,24 @@ void gameplay()
                 // If the player's input is a direction, ceil the position of the cursor
                 if(input == UP || input == DOWN || input == LEFT || input == RIGHT || input == SPACE){
                     if(direction == HORIZONTAL){
-                        ceil_position(p_cursor_pos, 0, ARRAY_SIZE - current_boat.lenght, 0, ARRAY_SIZE - 1);
+                        ceil_position(p_cursor_pos, 0, ARRAY_SIZE - p_current_boat -> lenght, 0, ARRAY_SIZE - 1);
                     } else {
-                        ceil_position(p_cursor_pos, 0, ARRAY_SIZE - 1, 0, ARRAY_SIZE - current_boat.lenght);
+                        ceil_position(p_cursor_pos, 0, ARRAY_SIZE - 1, 0, ARRAY_SIZE - p_current_boat -> lenght);
                     }
 
                     // Refresh display
-                    display_boat_placement(cursor_position, current_boat, direction, p_current_player);
+                    display_boat_placement(cursor_position, p_current_boat, direction, p_current_player);
 
                 // Else if the player's input is enter, place the current boat in the cursor position
                 } else if(input == ENTER) {
 
-                    if(is_boat_location_valid(p_current_player, cursor_position, current_boat, direction) == VRAI){
+                    if(is_boat_location_valid(p_current_player, cursor_position, p_current_boat, direction) == VRAI){
                         // Place the boat
-                        place_boat(p_current_player -> board, current_boat, cursor_position, direction);
+                        place_boat(p_current_player -> board, p_current_boat, cursor_position, direction);
                         nb_ex_left--;
 
                         // Refresh display
-                        display_boat_placement(cursor_position, current_boat, direction, p_current_player);
+                        display_boat_placement(cursor_position, p_current_boat, direction, p_current_player);
                     } else {
                         printf("La position de votre bateau n'est pas valide.\n");
                     }
@@ -173,17 +186,34 @@ void gameplay()
 
         printf("Placement termine, appuyez sur une touche pour continuer");
         input = ask_for_input();
-
-        // Reset the cursor position
-        reset_cursor_pos(&cursor_position);
     }
+}
 
-    // Reset the input
-    input = EMPTY_INPUT;
+
+// Gameplay procedure
+void gameplay_procedure(player* player_pointer_list[2], boat* boat_pointer_list[4]){
+
+    // Current and opponent player declaration
+    player* p_current_player = player_pointer_list[0];
+    player* p_opponent_player = player_pointer_list[1];
+
+    // Boat types number declaration
+    int boat_type_nb = 4;
+
+    // Inputs variables declaration
     INPUTS next_phase;
+    INPUTS input;
 
     BOULEIN fire;
     BOULEIN somebody_win = FAUX;
+
+    // Cursor declaration
+    vector2 cursor_position = {0, 0};
+    vector2* p_cursor_pos = &cursor_position;
+
+    // Direction declaration
+    int direction = HORIZONTAL;
+    int* p_direction = &direction;
 
     int p = 0;
 
@@ -247,7 +277,7 @@ void gameplay()
             }
 
             // Check for current player's victory
-            if(is_winning(p_opponent_player, boat_list, boat_type_nb) == VRAI){
+            if(is_winning(p_opponent_player, boat_pointer_list, boat_type_nb) == VRAI){
                 printf("%s a gagne la partie!\n", p_current_player -> name);
                 somebody_win = VRAI;
 

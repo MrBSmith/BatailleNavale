@@ -80,8 +80,8 @@ BOULEIN is_cell_inside_boat(int direction, vector2 cursor_pos, int boat_len, int
 }
 
 // Check if the current boat location is valid. Return VRAI is the boat location is valid, FAUX if not
-BOULEIN is_boat_location_valid(player* p_current_player, vector2 cursor_pos, boat current_boat, int direction){
-    for(int i = 0; i < current_boat.lenght; i++){
+BOULEIN is_boat_location_valid(player* p_current_player, vector2 cursor_pos, boat* p_current_boat, int direction){
+    for(int i = 0; i < p_current_boat -> lenght; i++){
         if(direction == HORIZONTAL){
             if(p_current_player -> board[cursor_pos.y][cursor_pos.x + i].content.y == UNDAMAGED_BOAT_CELL.y){
                 return FAUX;
@@ -96,13 +96,13 @@ BOULEIN is_boat_location_valid(player* p_current_player, vector2 cursor_pos, boa
 }
 
 // Check for victory condition. Return VRAI if the current player wins, FAUX if not
-BOULEIN is_winning(player *p_opponent, boat boat_list[], int boat_list_lenght){
+BOULEIN is_winning(player *p_opponent, boat* boat_pointer_list[], int boat_list_lenght){
     int cells_to_hit = 0;
     int boat_touched = 0;
 
     // Determine the number of cells you have to successfully hit to win
     for(int i = 0; i < boat_list_lenght; i++){
-        cells_to_hit += boat_list[i].initial_nb * boat_list[i].lenght;
+        cells_to_hit += boat_pointer_list[i] -> initial_nb * boat_pointer_list[i] -> lenght;
     }
 
     // Determine the number of cells you did hit
@@ -139,10 +139,10 @@ player* get_opponent(player* player_pointer_array[], player *p_current_player){
 ////////   DISPLAY PROCEDURES  ////////
 
 // Display the current player's boat placement
-void display_boat_placement(vector2 cursor_pos, boat current_boat, int direction, player* p_current_player){
+void display_boat_placement(vector2 cursor_pos, boat* p_current_boat, int direction, player* p_current_player){
     system("cls");
     printf("Au tour de %s de placer ses bateaux.\n", p_current_player -> name);
-    print_array_placement(p_current_player -> board, cursor_pos, current_boat, direction);
+    print_array_placement(p_current_player -> board, cursor_pos, p_current_boat, direction);
 }
 
 
@@ -206,10 +206,10 @@ void print_board_state(cell player_board[][ARRAY_SIZE], cell enemy_board[][ARRAY
 
 
 // Print every cells of the given array
-void print_array_placement(cell board[ARRAY_SIZE][ARRAY_SIZE], vector2 cursor_pos, boat curent_boat, int direction){
+void print_array_placement(cell board[ARRAY_SIZE][ARRAY_SIZE], vector2 cursor_pos, boat* p_curent_boat, int direction){
     for(int i = 0; i < ARRAY_SIZE; i++){
         for(int j = 0; j < ARRAY_SIZE; j++){
-            if(is_cell_inside_boat(direction, cursor_pos, curent_boat.lenght, i, j) == VRAI){
+            if(is_cell_inside_boat(direction, cursor_pos, p_curent_boat -> lenght, i, j) == VRAI){
                 change_text_color_vector2(CURSOR_CELL);
             } else {
                 change_text_color_vector2(board[i][j].content);
@@ -261,10 +261,10 @@ void change_text_color_vector2(vector2 cell_color){
 //////// BOAT PLACEMENT PROCEDURE ////////
 
 // Place the given boat at the given position, with the given direction in the given array
-void place_boat(cell board[ARRAY_SIZE][ARRAY_SIZE], boat current_boat, vector2 cursor_pos, int direction){
+void place_boat(cell board[ARRAY_SIZE][ARRAY_SIZE], boat* p_current_boat, vector2 cursor_pos, int direction){
     int h = 0, v = 0, i = 0, j = 0;
 
-    while(i < current_boat.lenght && j < current_boat.lenght){
+    while(i < p_current_boat -> lenght && j < p_current_boat -> lenght){
         h = cursor_pos.y + i;
         v = cursor_pos.x + j;
 
