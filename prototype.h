@@ -23,21 +23,20 @@ INPUTS ask_for_input();
 void respond_to_input(INPUTS input, vector2 *position, int *p_direction);
 
 // Boat placement
-void place_boat(vector2 board[ARRAY_SIZE][ARRAY_SIZE], boat current_boat, vector2 cursor_position, int direction);
+void place_boat(cell board[ARRAY_SIZE][ARRAY_SIZE], boat current_boat, vector2 cursor_position, int direction);
 
 // Initialize arrays
-void init_char_array(char array[ARRAY_SIZE][ARRAY_SIZE]);
-void init_color_array(vector2 array[ARRAY_SIZE][ARRAY_SIZE]);
+void init_board(cell board[ARRAY_SIZE][ARRAY_SIZE]);
 
 // Prints
-void print_self_board(vector2 array[ARRAY_SIZE][ARRAY_SIZE], vector2 cursor_pos, BOULEIN print_cursor);
-void print_array_placement(vector2 array[ARRAY_SIZE][ARRAY_SIZE], vector2 cursor_pos, boat curent_boat, int direction);
-void print_board_state(vector2 self_board[][ARRAY_SIZE], char enemy_board[][ARRAY_SIZE], vector2 cursor_pos, BOULEIN shooting);
+void print_self_board(cell board[ARRAY_SIZE][ARRAY_SIZE], vector2 cursor_pos, BOULEIN print_cursor);
+void print_array_placement(cell board[ARRAY_SIZE][ARRAY_SIZE], vector2 cursor_pos, boat curent_boat, int direction);
+void print_board_state(cell board[][ARRAY_SIZE], cell enemy_board[][ARRAY_SIZE], vector2 cursor_pos, BOULEIN shooting);
 
 void print_menu(char* menu_option_list[3], int menu_option_list_size, int cursor);
 
 // Display procedures
-void display_boat_placement(vector2 g_array[ARRAY_SIZE][ARRAY_SIZE], vector2 cursor_pos, boat curent_boat, int direction, player* p_current_player);
+void display_boat_placement(vector2 cursor_pos, boat current_boat, int direction, player* p_current_player);
 void display_gameplay(player* p_current_player, player* p_opponent_player, vector2 cursor_position);
 
 // Toggle values

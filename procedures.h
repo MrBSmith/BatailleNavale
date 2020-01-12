@@ -73,7 +73,7 @@ void gameplay()
 {
     system("cls");
 
-    // Players definition
+    // Players declaration
     player player1, player2;
 
     player* player_pointer_list[2] = {&player1, &player2};
@@ -82,23 +82,24 @@ void gameplay()
 
     int player_nb = sizeof(player_pointer_list) / sizeof(player_pointer_list[0]);
 
-    // Get the players to enter their names and initialize their scores
+    // Get the players to enter their names and initialize their scores and their boards
     for(int p = 0; p < player_nb; p++){
         printf("Entrez le nom du %de joueur\n", p + 1);
         gets(player_pointer_list[p] -> name);
+
         player_pointer_list[p] -> score = 100;
+        init_board(player_pointer_list[p] -> board);
     }
 
-    // Initialize arrays
-    init_color_array(player1.self_board);
-    init_char_array(player1.enemy_board);
-    init_color_array(player2.self_board);
-    init_char_array(player2.enemy_board);
+    printf("Noms enregistres, appuyez sur une touche pour continuer");
+    INPUTS input = ask_for_input();
+
 
     // Cursor declaration
     vector2 cursor_position = {0, 0};
     vector2* p_cursor_pos = &cursor_position;
 
+    // Direction declaration
     int direction = HORIZONTAL;
     int* p_direction = &direction;
 
@@ -113,7 +114,9 @@ void gameplay()
 
     int boat_type_nb = sizeof(boat_list) / sizeof(boat_list[0]);
 
-    int input, nb_ex_left;
+    int nb_ex_left;
+
+    input = EMPTY_INPUT;
 
     // Boat placement loop
     // Loop through every players
@@ -128,7 +131,7 @@ void gameplay()
             current_boat = boat_list[i];
             nb_ex_left = current_boat.initial_nb;
             if (i == 0){
-                display_boat_placement(p_current_player -> self_board, cursor_position, current_boat, direction, p_current_player);
+                display_boat_placement(cursor_position, current_boat, direction, p_current_player);
             }
 
             // Empty the input variable
@@ -149,26 +152,27 @@ void gameplay()
                     }
 
                     // Refresh display
-                    display_boat_placement(p_current_player -> self_board, cursor_position, current_boat, direction, p_current_player);
+                    display_boat_placement(cursor_position, current_boat, direction, p_current_player);
 
                 // Else if the player's input is enter, place the current boat in the cursor position
                 } else if(input == ENTER) {
 
-                    // write_score(p_current_player, 10);
-
                     if(is_boat_location_valid(p_current_player, cursor_position, current_boat, direction) == VRAI){
                         // Place the boat
-                        place_boat(p_current_player -> self_board, current_boat, cursor_position, direction);
+                        place_boat(p_current_player -> board, current_boat, cursor_position, direction);
                         nb_ex_left--;
 
                         // Refresh display
-                        display_boat_placement(p_current_player -> self_board, cursor_position, current_boat, direction, p_current_player);
+                        display_boat_placement(cursor_position, current_boat, direction, p_current_player);
                     } else {
                         printf("La position de votre bateau n'est pas valide.\n");
                     }
                 }
             }
         }
+
+        printf("Placement termine, appuyez sur une touche pour continuer");
+        input = ask_for_input();
 
         // Reset the cursor position
         reset_cursor_pos(&cursor_position);
@@ -211,21 +215,21 @@ void gameplay()
             } else if(input == ENTER){
 
                 // Check if the current position has already been fired of not
-                if(p_current_player -> enemy_board[cursor_position.y][cursor_position.x] != 'X'){
+                if(p_opponent_player -> board[cursor_position.y][cursor_position.x].state != 'X'){
 
                     // Decrement the score of the current player
                     p_current_player -> score--;
 
-                    //
-                    p_current_player -> enemy_board[cursor_position.y][cursor_position.x] = 'X';
+                    // Set the state of the targeted cell to 'X', witch means touched
+                    p_opponent_player -> board[cursor_position.y][cursor_position.x].state = 'X';
                     fire = VRAI;
 
                     // Refresh the display
                     display_gameplay(p_current_player, p_opponent_player, cursor_position);
 
                     // Damage the boat if there is one in the current position
-                    if(p_opponent_player -> self_board[cursor_position.y][cursor_position.x].y == UNDAMAGED_BOAT_CELL.y){
-                        p_opponent_player -> self_board[cursor_position.y][cursor_position.x] = DAMAGED_BOAT_CELL;
+                    if(p_opponent_player -> board[cursor_position.y][cursor_position.x].content.y == UNDAMAGED_BOAT_CELL.y){
+                        p_opponent_player -> board[cursor_position.y][cursor_position.x].content = DAMAGED_BOAT_CELL;
                         printf("Touche!\n");
                     } else {
                         printf("Dans l'eau!\n");
@@ -249,6 +253,9 @@ void gameplay()
 
                 // Write the score of the winning player in the binary file
                 write_score(p_current_player -> name, p_current_player -> score);
+
+                // Wait an input to proceed
+                input = ask_for_input();
             }
         }
 

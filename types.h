@@ -20,6 +20,7 @@ typedef enum COLOR{
     RED = 12,
     BLACK = 0,
     BLUE = 9,
+    KAKI = 6,
     WHITE = 15
 } COLOR;
 
@@ -53,11 +54,17 @@ typedef struct boat{
 } boat;
 
 
+// Define the cell of a board
+typedef struct cell{
+    char state;
+    vector2 content;
+} cell;
+
+
 // Player type definition
 typedef struct player{
     char name[10];
-    vector2 self_board[ARRAY_SIZE][ARRAY_SIZE];
-    char enemy_board[ARRAY_SIZE][ARRAY_SIZE];
+    cell board[ARRAY_SIZE][ARRAY_SIZE];
     int score;
 } player;
 
@@ -67,6 +74,6 @@ vector2 EMPTY_CELL = {WHITE, BLACK};
 vector2 CURSOR_CELL = {BLACK, WHITE};
 vector2 WATER_CELL = {WHITE, BLUE};
 vector2 DAMAGED_BOAT_CELL = {WHITE, RED};
-vector2 UNDAMAGED_BOAT_CELL = {WHITE, GREEN};
+vector2 UNDAMAGED_BOAT_CELL = {WHITE, KAKI};
 
 #endif // TYPES_H_INCLUDED

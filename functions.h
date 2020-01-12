@@ -4,12 +4,30 @@
 #include "types.h"
 #include "prototype.h"
 
+//////// CURSOR RELATED FUNCTIONS ////////
+
 // Reset cursor position
 void reset_cursor_pos(vector2* p_cursor){
     p_cursor -> x = 0;
     p_cursor -> y = 0;
 }
 
+
+// Ceil the given position to given min and max
+void ceil_position(vector2 *position, int x_min, int x_max, int y_min, int y_max){
+    if(position -> x < x_min){
+        position -> x = x_min;
+    } else if(position -> x > x_max){
+        position -> x = x_max;
+    }
+    if(position -> y < y_min){
+        position -> y = y_min;
+    } else if(position -> y > y_max){
+        position -> y = y_max;
+    }
+}
+
+//////// MENU NAVIGATION FUNCTIONS ////////
 
 // Menu navigation
 int navigate_menu(int index, int menu_size, INPUTS input){
@@ -27,17 +45,7 @@ int navigate_menu(int index, int menu_size, INPUTS input){
     return index;
 }
 
-
-// Toggle player index
-int toggle_player_index(int p){
-    if(p == 0){
-        p = 1;
-    } else {
-        p = 0;
-    }
-    return p;
-}
-
+//////// BINARY FILE RELATED FUNCTIONS ////////
 
 // Write the score and the player's name into the file
 void write_score(char name[20], int score){
@@ -55,20 +63,163 @@ void write_score(char name[20], int score){
 }
 
 
-// Return VRAI is the boat location is valid, FAUX if not
+//////// CHECKING FUCNTIONS ////////
+
+// Check if the given cell is inside a boat or not
+BOULEIN is_cell_inside_boat(int direction, vector2 cursor_pos, int boat_len, int i, int j){
+    if (direction == VERTICAL){
+         if(i >= cursor_pos.y && i < cursor_pos.y + boat_len && j == cursor_pos.x){
+            return VRAI;
+        }
+    } else {
+        if(i == cursor_pos.y && j >= cursor_pos.x && j < cursor_pos.x + boat_len){
+            return VRAI;
+        }
+    }
+    return FAUX;
+}
+
+// Check if the current boat location is valid. Return VRAI is the boat location is valid, FAUX if not
 BOULEIN is_boat_location_valid(player* p_current_player, vector2 cursor_pos, boat current_boat, int direction){
     for(int i = 0; i < current_boat.lenght; i++){
         if(direction == HORIZONTAL){
-            if(p_current_player -> self_board[cursor_pos.y][cursor_pos.x + i].y == UNDAMAGED_BOAT_CELL.y){
+            if(p_current_player -> board[cursor_pos.y][cursor_pos.x + i].content.y == UNDAMAGED_BOAT_CELL.y){
                 return FAUX;
             }
         } else {
-            if(p_current_player -> self_board[cursor_pos.y + i][cursor_pos.x].y == UNDAMAGED_BOAT_CELL.y){
+            if(p_current_player -> board[cursor_pos.y + i][cursor_pos.x].content.y == UNDAMAGED_BOAT_CELL.y){
                 return FAUX;
             }
         }
     }
     return VRAI;
+}
+
+// Check for victory condition. Return VRAI if the current player wins, FAUX if not
+BOULEIN is_winning(player *p_opponent, boat boat_list[], int boat_list_lenght){
+    int cells_to_hit = 0;
+    int boat_touched = 0;
+
+    // Determine the number of cells you have to successfully hit to win
+    for(int i = 0; i < boat_list_lenght; i++){
+        cells_to_hit += boat_list[i].initial_nb * boat_list[i].lenght;
+    }
+
+    // Determine the number of cells you did hit
+    for(int i = 0; i < ARRAY_SIZE; i++){
+        for(int j = 0; j < ARRAY_SIZE; j++){
+            if(p_opponent -> board[i][j].content.y == DAMAGED_BOAT_CELL.y){
+                 boat_touched++;
+            }
+        }
+    }
+
+    // Check if the player has touched all the cells he needs to win
+    if(boat_touched >= cells_to_hit){
+        return VRAI;
+    }
+
+    // Return false, in any other case
+    return FAUX;
+}
+
+//////// PLAYERS MANAGMENT FUNCTIONS ////////
+
+// Return the current player's opponent
+player* get_opponent(player* player_pointer_array[], player *p_current_player){
+    player* p_opponent;
+    if(p_current_player == player_pointer_array[0]){
+        p_opponent = player_pointer_array[1];
+    } else{
+        p_opponent = player_pointer_array[0];
+    }
+    return p_opponent;
+}
+
+////////   DISPLAY PROCEDURES  ////////
+
+// Display the current player's boat placement
+void display_boat_placement(vector2 cursor_pos, boat current_boat, int direction, player* p_current_player){
+    system("cls");
+    printf("Au tour de %s de placer ses bateaux.\n", p_current_player -> name);
+    print_array_placement(p_current_player -> board, cursor_pos, current_boat, direction);
+}
+
+
+// Display gameplay procedure
+void display_gameplay(player* p_current_player, player* p_opponent_player, vector2 cursor_position){
+    system("cls");
+
+    // Print witch player's turn it is
+    printf("C'est le tour de %s: \n", p_current_player -> name);
+
+    // Print the current_player board
+    printf("Voici l'etat de votre grille:\n");
+    print_board_state(p_current_player -> board, p_opponent_player -> board, cursor_position, FAUX);
+
+   // Print what the current player knows about the opponent board
+    printf("Voici l'etat de la grille de votre adversaire:\n");
+    print_board_state(p_current_player -> board, p_opponent_player -> board, cursor_position, VRAI);
+}
+
+
+//////// PRINT FUNCTIONS ////////
+
+// Print the board of a player
+void print_board_state(cell player_board[][ARRAY_SIZE], cell enemy_board[][ARRAY_SIZE], vector2 cursor_pos, BOULEIN shooting){
+    for(int i = 0; i < ARRAY_SIZE; i++){
+        for(int j = 0; j < ARRAY_SIZE; j++){
+
+            // If we want to print the board of the current player
+            if(shooting == FAUX){
+
+                change_text_color_vector2(player_board[i][j].content);
+
+                // In any case, print the state of the cell
+                printf("%c ", player_board[i][j].state);
+
+            // If we want to print what the current player knows about the opponent board
+            } else {
+                // Change the color of the current cell if it's where the cursor is
+                if(cursor_pos.x == j && cursor_pos.y == i){
+                    change_text_color_vector2(CURSOR_CELL);
+
+                // If the current cell as already been fired, show it content
+                } else if(enemy_board[i][j].state == 'X'){
+                    change_text_color_vector2(enemy_board[i][j].content);
+
+                // If the current cell has not been fired, hide it content
+                } else{
+                    change_text_color_vector2(EMPTY_CELL);
+                }
+
+                // In any case, print the state of the cell
+                printf("%c ", enemy_board[i][j].state);
+            }
+        }
+        printf("\n");
+    }
+    // Reset the color for further printing
+    change_text_color_vector2(EMPTY_CELL);
+    printf("\n");
+}
+
+
+// Print every cells of the given array
+void print_array_placement(cell board[ARRAY_SIZE][ARRAY_SIZE], vector2 cursor_pos, boat curent_boat, int direction){
+    for(int i = 0; i < ARRAY_SIZE; i++){
+        for(int j = 0; j < ARRAY_SIZE; j++){
+            if(is_cell_inside_boat(direction, cursor_pos, curent_boat.lenght, i, j) == VRAI){
+                change_text_color_vector2(CURSOR_CELL);
+            } else {
+                change_text_color_vector2(board[i][j].content);
+            }
+            printf("0 ");
+        }
+        printf("\n");
+    }
+    change_text_color_vector2(EMPTY_CELL);
+    printf("\n");
 }
 
 
@@ -98,99 +249,19 @@ void print_menu(char* menu_option_list[3], int menu_option_list_size, int cursor
     }
 }
 
+//////// COLOR RELATED FUNCTIONS ////////
 
-// Display gameplay procedure
-void display_gameplay(player* p_current_player, player* p_opponent_player, vector2 cursor_position){
-    system("cls");
-
-    // Print witch player's turn it is
-    printf("C'est le tour de %s: \n", p_current_player -> name);
-
-    // Print the current_player self board
-    printf("Voici l'etat de votre grille:\n");
-    print_board_state(p_current_player -> self_board, p_opponent_player -> enemy_board, cursor_position, FAUX);
-
-   // Print what the current player knows about the opponent board
-    printf("Voici l'etat de la grille de votre adversaire:\n");
-    print_board_state(p_opponent_player -> self_board, p_current_player -> enemy_board, cursor_position, VRAI);
+// Change the colors of the text with a vector2, the x is the text color, the y the background color
+void change_text_color_vector2(vector2 cell_color){
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, cell_color.y * 16 + cell_color.x);
 }
 
 
-// Victory condition: return VRAI if the current player wins, FAUX if not
-BOULEIN is_winning(player *p_opponent, boat boat_list[], int boat_list_lenght){
-    int cells_to_hit = 0;
-    int boat_touched = 0;
-
-    // Determine the number of cells you have to successfully hit to win
-    for(int i = 0; i < boat_list_lenght; i++){
-        cells_to_hit += boat_list[i].initial_nb * boat_list[i].lenght;
-    }
-
-    // Determine the number of cells you did hit
-    for(int i = 0; i < ARRAY_SIZE; i++){
-        for(int j = 0; j < ARRAY_SIZE; j++){
-            if(p_opponent -> self_board[i][j].y == DAMAGED_BOAT_CELL.y){
-                 boat_touched++;
-            }
-        }
-    }
-
-    // Check if the player has touched all the cells he needs to win
-    if(boat_touched >= cells_to_hit){
-        return VRAI;
-    }
-
-    // Return false, in any other case
-    return FAUX;
-}
-
-
-// Print the board of a player
-void print_board_state(vector2 self_board[][ARRAY_SIZE], char enemy_board[][ARRAY_SIZE], vector2 cursor_pos, BOULEIN shooting){
-    for(int i = 0; i < ARRAY_SIZE; i++){
-        for(int j = 0; j < ARRAY_SIZE; j++){
-            if(shooting == FAUX){
-                change_text_color_vector2(self_board[i][j]);
-            } else {
-                if(cursor_pos.x == j && cursor_pos.y == i){
-                    change_text_color_vector2(CURSOR_CELL);
-                } else if(enemy_board[i][j] == 'X'){
-                    change_text_color_vector2(self_board[i][j]);
-                } else{
-                    change_text_color_vector2(EMPTY_CELL);
-                }
-            }
-            printf("%c ", enemy_board[i][j]);
-        }
-        printf("\n");
-    }
-    change_text_color_vector2(EMPTY_CELL);
-    printf("\n");
-}
-
-
-// Return the current player's opponent
-player* get_opponent(player* player_pointer_array[], player *p_current_player){
-    player* p_opponent;
-    if(p_current_player == player_pointer_array[0]){
-        p_opponent = player_pointer_array[1];
-    } else{
-        p_opponent = player_pointer_array[0];
-    }
-    return p_opponent;
-}
-
-
-// Display the current player's boat placement
-void display_boat_placement(vector2 g_array[ARRAY_SIZE][ARRAY_SIZE], vector2 cursor_pos, boat current_boat, int direction, player* p_current_player){
-    system("cls");
-    printf("Au tour de %s de placer ses bateaux.\n", (*p_current_player).name);
-    print_array_placement((*p_current_player).self_board, cursor_pos, current_boat, direction);
-}
-
+//////// BOAT PLACEMENT PROCEDURE ////////
 
 // Place the given boat at the given position, with the given direction in the given array
-void place_boat(vector2 board[ARRAY_SIZE][ARRAY_SIZE], boat current_boat, vector2 cursor_pos, int direction){
+void place_boat(cell board[ARRAY_SIZE][ARRAY_SIZE], boat current_boat, vector2 cursor_pos, int direction){
     int h = 0, v = 0, i = 0, j = 0;
 
     while(i < current_boat.lenght && j < current_boat.lenght){
@@ -203,10 +274,12 @@ void place_boat(vector2 board[ARRAY_SIZE][ARRAY_SIZE], boat current_boat, vector
             j++;
         }
 
-        board[h][v] = UNDAMAGED_BOAT_CELL;
+        board[h][v].content = UNDAMAGED_BOAT_CELL;
     }
 }
 
+
+//////// INPUT RELATED FUNCTIONS ////////
 
 // Get inputs from a player, and return the corresponding input type
 INPUTS ask_for_input(){
@@ -247,20 +320,17 @@ void respond_to_input(INPUTS input, vector2 *position, int *p_direction){
 }
 
 
-// Ceil the given position to given min and max
-void ceil_position(vector2 *position, int x_min, int x_max, int y_min, int y_max){
-    if(position -> x < x_min){
-        position -> x = x_min;
-    } else if(position -> x > x_max){
-        position -> x = x_max;
-    }
-    if(position -> y < y_min){
-        position -> y = y_min;
-    } else if(position -> y > y_max){
-        position -> y = y_max;
-    }
-}
+//////// TOGGLE FUNCTIONS ////////
 
+// Toggle player index
+int toggle_player_index(int p){
+    if(p == 0){
+        p = 1;
+    } else {
+        p = 0;
+    }
+    return p;
+}
 
 // Toggle the given booleen
 void toggle_bool(BOULEIN boolean){
@@ -282,25 +352,19 @@ void toggle_direction(int *p_direction){
 }
 
 
-// Initialize the given array with O char in every cells
-void init_char_array(char array[ARRAY_SIZE][ARRAY_SIZE]){
+//////// INITIALIZATION FUNCTIONS ////////
+
+// Initialize the given board with 0 char for the state (meaning its untouched) and WATER_CELL for the content in every cells
+void init_board(cell board[ARRAY_SIZE][ARRAY_SIZE]){
     for(int i = 0; i < ARRAY_SIZE; i++){
         for(int j = 0; j < ARRAY_SIZE; j++){
-            array[i][j] = 'O';
+            board[i][j].state = '0';
+            board[i][j].content = WATER_CELL;
         }
     }
 }
 
-
-// Initialize the given array with white for text and black for background in every cells
-void init_color_array(vector2 array[ARRAY_SIZE][ARRAY_SIZE]){
-    for(int i = 0; i < ARRAY_SIZE; i++){
-        for(int j = 0; j < ARRAY_SIZE; j++){
-            array[i][j] = WATER_CELL;
-        }
-    }
-}
-
+//////// ARRAY DUPLACTION ////////
 
 // Copy the given array into the second given array
 void copy_board(vector2 board_to_copy[ARRAY_SIZE][ARRAY_SIZE], vector2 destination_board[ARRAY_SIZE][ARRAY_SIZE]){
@@ -309,46 +373,6 @@ void copy_board(vector2 board_to_copy[ARRAY_SIZE][ARRAY_SIZE], vector2 destinati
             destination_board[i][j] = board_to_copy[i][j];
         }
     }
-}
-
-
-// Print every cells of the given array
-void print_array_placement(vector2 g_array[ARRAY_SIZE][ARRAY_SIZE], vector2 cursor_pos, boat curent_boat, int direction){
-    for(int i = 0; i<ARRAY_SIZE; i++){
-        for(int j = 0; j<ARRAY_SIZE; j++){
-            if(is_cell_inside_boat(direction, cursor_pos, curent_boat.lenght, i, j) == VRAI){
-                change_text_color_vector2(CURSOR_CELL);
-            } else {
-                change_text_color_vector2(g_array[i][j]);
-            }
-            printf("0 ");
-        }
-        printf("\n");
-    }
-    change_text_color_vector2(EMPTY_CELL);
-    printf("\n");
-}
-
-
-// Check if the given cell is inside a boat or not
-BOULEIN is_cell_inside_boat(int direction, vector2 cursor_pos, int boat_len, int i, int j){
-    if (direction == VERTICAL){
-         if(i >= cursor_pos.y && i < cursor_pos.y + boat_len && j == cursor_pos.x){
-            return VRAI;
-        }
-    } else {
-        if(i == cursor_pos.y && j >= cursor_pos.x && j < cursor_pos.x + boat_len){
-            return VRAI;
-        }
-    }
-    return FAUX;
-}
-
-
-// Change the colors of the text with a vector2, the x is the text color, the y the background color
-void change_text_color_vector2(vector2 cell_color){
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleTextAttribute(hConsole, cell_color.y * 16 + cell_color.x);
 }
 
 #endif // FUNCTIONS_H_INCLUDED
