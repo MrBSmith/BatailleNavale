@@ -142,6 +142,7 @@ player* get_opponent(player* player_pointer_array[], player *p_current_player){
 void display_boat_placement(vector2 cursor_pos, boat* p_current_boat, int direction, player* p_current_player){
     system("cls");
     printf("Au tour de %s de placer ses bateaux.\n", p_current_player -> name);
+    printf("Utilisez Z Q S et D pour vous deplacer dans la grille, ESPACE pour tourner le bateau, ENTRER pour le placer.\n\n");
     print_array_placement(p_current_player -> board, cursor_pos, p_current_boat, direction);
 }
 
@@ -159,6 +160,7 @@ void display_gameplay(player* p_current_player, player* p_opponent_player, vecto
 
    // Print what the current player knows about the opponent board
     printf("Voici l'etat de la grille de votre adversaire:\n");
+    printf("Utilisez Z Q S et D pour vous deplacer dans la grille, ENTRER pour tirer.\n\n");
     print_board_state(p_current_player -> board, p_opponent_player -> board, cursor_position, VRAI);
 }
 
